@@ -26,9 +26,11 @@ def extract_keys():
         # Construct the target URL with the specific suffix expected by the backend
         target_url = f"{KOYEB_API_URL}?url={url}@botupdatevip4u&user_id={user_id}"
         
-        # Add headers if needed (some APIs check User-Agent)
+        # Add headers required by the backend (it likely acts as a Classplus client)
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Referer": "https://web.classplusapp.com/",
+            "x-cdn-tag": "empty"
         }
 
         response = requests.get(target_url, headers=headers, timeout=20)
