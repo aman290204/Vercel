@@ -1,5 +1,6 @@
 from flask import Flask, request, Response, stream_with_context, jsonify
 import requests
+from urllib.parse import quote
 
 app = Flask(__name__)
 
@@ -19,18 +20,28 @@ def extract_keys():
     if not url:
         return jsonify({"error": "Missing 'url' parameter"}), 400
 
-    # Format strictly as seen in drm_handler_itsgolu.py
-    # url = f"https://head-micheline-botupdatevip-f1804c58.koyeb.app/get_keys?url={url}@botupdatevip4u&user_id={user_id}"
-    
+    # DEBUG: Log input
+    print(f"Proxying for URL: {url}")
+
     try:
-        # Construct the target URL with the specific suffix expected by the backend
+        # Construct the target URL carefully. 
+        # The backend likely triggers on the literal '@botupdatevip4u' suffix.
+        # We encode the video URL to avoid query parameter confusion, assuming backend handles encoded value.
+        # encoded_url = quote(url, safe=':/') # Encode but keep protocol chars? Or full encode?
+        # Let's try passing it RAW first as the original python code did, but ensure requests doesn't mangle it.
+        
+        # Original code: f"...?url={url}@botupdatevip4u..."
+        # If requests encodes the '@', it breaks.
+        
         target_url = f"{KOYEB_API_URL}?url={url}@botupdatevip4u&user_id={user_id}"
         
         # Add headers required by the backend (it likely acts as a Classplus client)
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Referer": "https://web.classplusapp.com/",
-            "x-cdn-tag": "empty"
+            "x-cdn-tag": "empty",
+            # Add Origin just in case
+            "Origin": "https://web.classplusapp.com"
         }
 
         response = requests.get(target_url, headers=headers, timeout=20)
@@ -38,7 +49,14 @@ def extract_keys():
         if response.status_code == 200:
             return jsonify(response.json())
         else:
-            return jsonify({"error": "Backend API Error", "status": response.status_code, "details": response.text}), response.status_code
+            # Return FULL DETAILS for debugging
+            return jsonify({
+                "error": "Backend API Error", 
+                "status": response.status_code, 
+                "headers_sent": dict(response.request.headers),
+                "url_requested": response.request.url,
+                "details": response.text
+            }), response.status_code
 
     except Exception as e:
         return jsonify({"error": "Internal Proxy Error", "details": str(e)}), 500
