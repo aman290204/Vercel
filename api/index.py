@@ -16,6 +16,7 @@ def extract_keys():
     """
     url = request.args.get('url')
     user_id = request.args.get('user_id', 'unknown')
+    token = request.args.get('token')
 
     if not url:
         return jsonify({"error": "Missing 'url' parameter"}), 400
@@ -24,16 +25,13 @@ def extract_keys():
     print(f"Proxying for URL: {url}")
 
     try:
-        # Construct the target URL carefully. 
-        # The backend likely triggers on the literal '@botupdatevip4u' suffix.
-        # We encode the video URL to avoid query parameter confusion, assuming backend handles encoded value.
-        # encoded_url = quote(url, safe=':/') # Encode but keep protocol chars? Or full encode?
-        # Let's try passing it RAW first as the original python code did, but ensure requests doesn't mangle it.
+        # Construct the target URL
+        # The backend requires a token functionality now.
+        suffix = "@botupdatevip4u"
+        target_url = f"{KOYEB_API_URL}?url={url}{suffix}&user_id={user_id}"
         
-        # Original code: f"...?url={url}@botupdatevip4u..."
-        # If requests encodes the '@', it breaks.
-        
-        target_url = f"{KOYEB_API_URL}?url={url}@botupdatevip4u&user_id={user_id}"
+        if token:
+            target_url += f"&token={token}"
         
         # Add headers required by the backend (it likely acts as a Classplus client)
         headers = {
