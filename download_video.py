@@ -13,7 +13,7 @@ def download_video(content_url, output_name="Polity_Part_1"):
     """Sign URL and download video"""
     
     # Local API endpoint
-    api_base = "http://127.0.0.1:5000/ITsGOLU_OFFICIAL?url="
+    api_base = "http://127.0.0.1:5000/AANT?url="
     
     print(f"[1/3] Getting signed URL for: {content_url[:60]}...")
     

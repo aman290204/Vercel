@@ -415,11 +415,11 @@ def favicon_png():
 def home():
     return jsonify({
         "message": "Welcome",
-        "example": f"{request.url_root}ITsGOLU_OFFICIAL?url={{url}}"
+        "example": f"{request.url_root}AANT?url={{url}}"
     })
 
-@app.route('/ITsGOLU_OFFICIAL', methods=['GET'])
-def ITsGOLU_OFFICIAL():
+@app.route('/AANT', methods=['GET'])
+def AANT():
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "URL required"}), 400
